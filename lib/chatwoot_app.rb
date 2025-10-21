@@ -12,10 +12,12 @@ module ChatwootApp
   end
 
   def self.enterprise?
-    return if ENV.fetch('DISABLE_ENTERPRISE', false)
+    disabled = ENV['DISABLE_ENTERPRISE']
+    return false if %w[1 true yes on].include?(disabled.to_s.downcase)
 
-    @enterprise ||= root.join('enterprise').exist?
+    true
   end
+
 
   def self.chatwoot_cloud?
     enterprise? && GlobalConfig.get_value('DEPLOYMENT_ENV') == 'cloud'
