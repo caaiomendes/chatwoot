@@ -2,15 +2,7 @@ version: '3'
 
 services:
   base: &base
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      args:
-        BUNDLE_WITHOUT: 'development:test'
-        EXECJS_RUNTIME: 'Disabled'
-        RAILS_ENV: 'production'
-        RAILS_SERVE_STATIC_FILES: 'true'
-    image: chatwoot:production
+    image: chatwoot:development
     env_file: .env ## Change this file for customized env variables
     volumes:
       - storage_data:/app/storage
