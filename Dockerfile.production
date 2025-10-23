@@ -38,6 +38,7 @@ RUN apk update && apk add --no-cache \
   curl \
   xz \
   vips \
+  sqlite \
   && mkdir -p /var/app \
   && gem install bundler
 
@@ -71,12 +72,12 @@ RUN pnpm i
 # Copy your custom application code
 COPY . /app
 
-# Create log directory
-RUN mkdir -p /app/log
+# Create log and tmp directories
+RUN mkdir -p /app/log /app/tmp
 
-# Precompile assets for production WITHOUT database connection
+# Precompile assets for production WITHOUT real database connection
 RUN SECRET_KEY_BASE=precompile_placeholder \
-    DATABASE_URL=nulldb://localhost \
+    DATABASE_URL=sqlite3://localhost/tmp/dummy.sqlite3 \
     DISABLE_DATABASE_ENVIRONMENT_CHECK=1 \
     RAILS_LOG_TO_STDOUT=enabled \
     bundle exec rake assets:precompile \
