@@ -1,0 +1,84 @@
+# docker-compose.prod.yaml
+version: '3'
+services:
+  # 1. Definir a Imagem Base (base)
+  base: &base
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      args:
+        # Definir variáveis de ambiente de build para produção
+        BUNDLE_WITHOUT: 'development:test'
+        EXECJS_RUNTIME: 'Node'
+        RAILS_ENV: 'production'
+        RAILS_SERVE_STATIC_FILES: 'true' # Importante para produção
+    image: chatwoot-custom:base # Nome da sua imagem base customizada
+    env_file: .env
+    volumes:
+      # Volumes para garantir que os assets e pacotes sejam persistidos durante o build
+      - node_modules:/app/node_modules
+      - packs:/app/public/packs
+      - cache:/app/tmp/cache
+
+  # 2. Definir o Serviço Principal (rails)
+  rails:
+    <<: *base
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/rails.Dockerfile # Usa o Dockerfile específico para Rails
+    image: chatwoot-custom:latest # ESTA É A IMAGEM FINAL QUE VOCÊ VAI USAR NO COOLIFY
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '3000:3000' # Porta exposta para o Coolify
+    environment:
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      # Adicione aqui suas variáveis de ambiente de produção (SECRET_KEY_BASE, etc.)
+    entrypoint: docker/entrypoints/rails.sh
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    restart: always
+    volumes:
+      - storage_data:/app/storage # Volume para uploads de arquivos
+
+  # 3. Definir o Serviço de Processamento em Background (sidekiq)
+  sidekiq:
+    <<: *base
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/sidekiq.Dockerfile
+    image: chatwoot-custom:sidekiq
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+    entrypoint: docker/entrypoints/sidekiq.sh
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    restart: always
+
+  # 4. Serviços de Banco de Dados e Cache (inclusos para um ambiente completo)
+  postgres:
+    image: postgres:14.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: chatwoot_password
+      POSTGRES_DB: chatwoot_production
+    restart: always
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+
+volumes:
+  postgres_data:
+  storage_data:
+  node_modules: # Volumes para o build
+  packs: # Volumes para o build
+  cache: # Volumes para o build
