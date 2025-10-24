@@ -63,14 +63,16 @@ services:
 
   # 4. Serviços de Banco de Dados e Cache (inclusos para um ambiente completo)
   postgres:
-    image: postgres:14.1-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: chatwoot
-      POSTGRES_PASSWORD: chatwoot_password
-      POSTGRES_DB: chatwoot_production
+    image: pgvector/pgvector:pg16
     restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres:/data/postgres
+    environment:
+      - POSTGRES_DB=chatwoot
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=c1a2i9o5
 
   redis:
     image: redis:6.2-alpine
