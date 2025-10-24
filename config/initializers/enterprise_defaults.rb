@@ -2,7 +2,8 @@
 
 # Ensure every deployment runs in enterprise mode with all features enabled.
 
-next if ENV['SKIP_DATABASE'] == 'true'
+return if ENV['SKIP_DATABASE'] == 'true'
+
 Rails.application.config.after_initialize do
   unless Rails.configuration.instance_variable_defined?(:@enterprise_defaults_initialized)
     begin
