@@ -75,7 +75,7 @@ COPY . /app
 RUN mkdir -p /app/log
 
 # Precompile assets for production
-RUN SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+RUN SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled SKIP_DATABASE=true bundle exec rake assets:precompile \
   && rm -rf spec node_modules tmp/cache
 
 # Generate git SHA
