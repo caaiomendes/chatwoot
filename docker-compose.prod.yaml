@@ -46,10 +46,7 @@ services:
   # 3. Definir o Serviço de Processamento em Background (sidekiq)
   sidekiq:
     <<: *base
-    build:
-      context: .
-      dockerfile: ./docker/dockerfiles/sidekiq.Dockerfile
-    image: chatwoot-custom:sidekiq
+    image: chatwoot-custom:latest
     depends_on:
       - postgres
       - redis
