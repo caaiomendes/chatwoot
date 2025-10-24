@@ -68,7 +68,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres:/data/postgres
+      - postgres_data:/data/postgres
     environment:
       - POSTGRES_DB=chatwoot
       - POSTGRES_USER=postgres
